@@ -1,0 +1,29 @@
+# Ignorar dependencias
+/vendor
+composer.lock
+
+# Ignorar logs
+/storage/logs/*
+!/storage/logs/.gitkeep
+
+# Ignorar cachés y archivos generados
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/bootstrap/cache/*
+/public/storage
+
+# Ignorar archivos de entorno
+.env
+.env.backup
+.env.example
+
+# Ignorar archivos temporales
+*.log
+*.cache
+*.swp
+
+# Ignorar herramientas de desarrollo
+.phpstorm.meta.php
+.idea/
+*.code-workspace
