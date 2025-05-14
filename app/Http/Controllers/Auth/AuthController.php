@@ -69,6 +69,10 @@ class AuthController extends Controller
     // Método para obtener información del usuario autenticado
     public function user(Request $request)
     {
-        return response()->json($request->user());
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+        return new UserResource($user);
     }
 }

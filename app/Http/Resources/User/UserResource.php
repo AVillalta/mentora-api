@@ -28,6 +28,8 @@ class UserResource extends JsonResource
             'date_of_birth' => $this->date_of_birth,
             'role' => $this->roles->pluck('name')->first(),
             'permissions' => $this->getAllPermissions()->pluck('name')->toArray(),
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
     }
 }

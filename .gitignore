@@ -16,7 +16,6 @@ composer.lock
 # Ignorar archivos de entorno
 .env
 .env.backup
-.env.example
 
 # Ignorar archivos temporales
 *.log
