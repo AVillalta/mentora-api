@@ -9,17 +9,18 @@ use Illuminate\Support\Facades\Auth;
 
 class ProfessorScope implements Scope
 {
-    /**
-     * Apply the scope to a given Eloquent query builder.
-     */
     public function apply(Builder $builder, Model $model): void
     {
-        // Verificamos si el usuario es un profesor autenticado
         if (auth()->check() && auth()->user()->hasRole('professor')) {
-            // Si es profesor, limitamos la consulta a los cursos en los que está asignado como profesor
-            $builder->whereHas('signatures', function (Builder $query) {
-                $query->where('professor_id', auth()->id());
-            });
+            if ($model instanceof \App\Models\Course\Course) {
+                $builder->whereHas('signature', function (Builder $query) {
+                    $query->where('professor_id', auth()->id());
+                });
+            } elseif ($model instanceof \App\Models\Enrollment\Enrollment) {
+                $builder->whereHas('course.signature', function (Builder $query) {
+                    $query->where('professor_id', auth()->id());
+                });
+            }
         }
     }
 }
