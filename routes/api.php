@@ -8,6 +8,7 @@ use App\Http\Controllers\Semester\SemesterController;
 use App\Http\Controllers\Signature\SignatureController;
 use App\Http\Controllers\Course\CourseController;
 use App\Http\Controllers\Grade\GradeController;
+use App\Http\Controllers\Assignment\AssignmentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -36,6 +37,7 @@ Route::prefix('v1')->group(function () {
             Route::apiResource('enrollments', EnrollmentController::class);
             Route::apiResource('grades', GradeController::class);
             Route::apiResource('contents', ContentController::class);
+            Route::apiResource('assignments', AssignmentController::class);
         });
 
         // Rutas accesibles para admin, student y professor
@@ -43,9 +45,10 @@ Route::prefix('v1')->group(function () {
             Route::get('/courses', [CourseController::class, 'index']);
             Route::get('/grades', [GradeController::class, 'index']);
             Route::get('/contents', [ContentController::class, 'index']);
+            Route::get('/assignments', [AssignmentController::class, 'index']);
         });
 
-        // Rutas exclusivas para professor
+        // Rutas exclusivas para admin y professor
         Route::middleware('\App\Http\Middleware\MultiRoleMiddleware:admin,professor')->group(function () {
             Route::post('/grades', [GradeController::class, 'store']);
             Route::put('/grades/{grade}', [GradeController::class, 'update']);
@@ -53,7 +56,15 @@ Route::prefix('v1')->group(function () {
             Route::post('/contents', [ContentController::class, 'store']);
             Route::put('/contents/{content}', [ContentController::class, 'update']);
             Route::delete('/contents/{content}', [ContentController::class, 'destroy']);
+            Route::post('/assignments', [AssignmentController::class, 'store']);
+            Route::put('/assignments/{assignment}', [AssignmentController::class, 'update']);
+            Route::delete('/assignments/{assignment}', [AssignmentController::class, 'destroy']);
             Route::get('/enrollments', [EnrollmentController::class, 'index']);
+        });
+
+        // Rutas exclusivas para student
+        Route::middleware('\App\Http\Middleware\MultiRoleMiddleware:student')->group(function () {
+            Route::post('/assignments/{assignment}/submit', [AssignmentController::class, 'submit']);
         });
     });
 });

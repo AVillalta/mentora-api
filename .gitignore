@@ -13,6 +13,12 @@ composer.lock
 /bootstrap/cache/*
 /public/storage
 
+# Ignorar archivos generados por Spatie Media Library
+/storage/app/public/content_files/*
+/storage/app/public/assignment_submissions/*
+!/storage/app/public/content_files/.gitignore
+!/storage/app/public/assignment_submissions/.gitignore
+
 # Ignorar archivos de entorno
 .env
 .env.backup
@@ -26,3 +32,6 @@ composer.lock
 .phpstorm.meta.php
 .idea/
 *.code-workspace
+
+# Ignorar archivos de macOS
+.DS_Store

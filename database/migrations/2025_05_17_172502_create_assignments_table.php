@@ -8,22 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('contents', function (Blueprint $table) {
+        Schema::create('assignments', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('name');
+            $table->string('title');
             $table->text('description');
-            $table->text('bibliography')->nullable();
-            $table->integer('order');
-            $table->enum('type', ['document', 'presentation', 'video', 'code', 'spreadsheet'])->nullable();
-            $table->string('format')->nullable();
-            $table->unsignedInteger('views')->default(0);
-            $table->unsignedInteger('downloads')->default(0);
-            $table->string('duration')->nullable();
-            $table->uuid('course_id')->nullable();
+            $table->uuid('course_id');
             $table->foreign('course_id')
                 ->references('id')
                 ->on('courses')
-                ->nullOnDelete()
+                ->cascadeOnDelete()
                 ->cascadeOnUpdate();
             $table->uuid('grade_id')->nullable();
             $table->foreign('grade_id')
@@ -31,17 +24,21 @@ return new class extends Migration
                 ->on('grades')
                 ->nullOnDelete()
                 ->cascadeOnUpdate();
+            $table->date('due_date');
+            $table->integer('points');
+            $table->integer('submissions')->default(0);
+            $table->integer('total_students');
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::table('contents', function (Blueprint $table) {
+        Schema::table('assignments', function (Blueprint $table) {
             $table->dropForeign(['course_id']);
             $table->dropForeign(['grade_id']);
         });
 
-        Schema::dropIfExists('contents');
+        Schema::dropIfExists('assignments');
     }
 };

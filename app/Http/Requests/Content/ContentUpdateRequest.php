@@ -3,22 +3,15 @@
 namespace App\Http\Requests\Content;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ContentUpdateRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
@@ -26,30 +19,29 @@ class ContentUpdateRequest extends FormRequest
             'description' => 'sometimes|string',
             'bibliography' => 'sometimes|string',
             'order' => 'sometimes|integer',
-            'course_id' => 'sometimes|uuid|exists:courses,id', 
-            'grade_id' => 'sometimes|uuid|exists:grades,id',
+            'file' => 'sometimes|file|mimes:pdf,doc,docx,pptx,mp4|max:102400',
+            'type' => ['sometimes', Rule::in(['document', 'presentation', 'video', 'code', 'spreadsheet'])],
+            'format' => 'sometimes|string|in:pdf,doc,docx,pptx,mp4',
+            'duration' => 'sometimes|string',
+            'course_id' => 'sometimes|uuid|exists:courses,id',
+            'grade_id' => 'sometimes|nullable|uuid|exists:grades,id',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'name.sometimes' => 'The :attribute field is optional, but if provided, it must be a string.',
-            'name.string' => 'The :attribute must be a string.',
-            'name.max' => 'The :attribute may not be greater than 255 characters.',
-
-            'description.sometimes' => 'The :attribute field is optional, but if provided, it must be a string.',
-            'description.string' => 'The :attribute must be a string.',
-
-            'bibliography.sometimes' => 'The :attribute field is optional, but if provided, it must be a string.',
-            'bibliography.string' => 'The :attribute must be a string.',
-
-            'order.sometimes' => 'The :attribute field is optional, but if provided, it must be a string.',
-            'order.integer' => 'The :attribute must be a integer.',
-
-            'course_id.exists' => 'The selected :attribute does not exist.',
-            
-            'grade_id.exists' => 'The selected :attribute does not exist.',
+            'name.string' => 'El nombre debe ser una cadena.',
+            'name.max' => 'El nombre no puede tener más de 255 caracteres.',
+            'description.string' => 'La descripción debe ser una cadena.',
+            'bibliography.string' => 'La bibliografía debe ser una cadena.',
+            'order.integer' => 'El orden debe ser un número entero.',
+            'file.mimes' => 'El archivo debe ser de tipo PDF, DOC, DOCX, PPTX o MP4.',
+            'file.max' => 'El archivo no puede exceder 100MB.',
+            'type.in' => 'El tipo de material no es válido.',
+            'format.in' => 'El formato no es válido.',
+            'course_id.exists' => 'El curso seleccionado no existe.',
+            'grade_id.exists' => 'La nota seleccionada no existe.',
         ];
     }
 }
