@@ -26,7 +26,6 @@ class ContentService
                 'downloads' => 0,
                 'duration' => $data['duration'] ?? null,
                 'course_id' => $data['course_id'],
-                'grade_id' => $data['grade_id'] ?? null,
             ]);
 
             if (isset($data['file'])) {
@@ -59,7 +58,6 @@ class ContentService
                 'downloads' => $data['downloads'] ?? $content->downloads,
                 'duration' => $data['duration'] ?? $content->duration,
                 'course_id' => $data['course_id'] ?? $content->course_id,
-                'grade_id' => $data['grade_id'] ?? $content->grade_id,
             ];
 
             $content->update($updates);

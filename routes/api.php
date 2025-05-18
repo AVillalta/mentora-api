@@ -38,6 +38,7 @@ Route::prefix('v1')->group(function () {
             Route::apiResource('grades', GradeController::class);
             Route::apiResource('contents', ContentController::class);
             Route::apiResource('assignments', AssignmentController::class);
+            Route::post('assignments/{assignment}/submissions/{submissionId}/grade', [AssignmentController::class, 'gradeSubmission']);
         });
 
         // Rutas accesibles para admin, student y professor

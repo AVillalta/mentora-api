@@ -3,7 +3,6 @@
 namespace App\Models\Content;
 
 use App\Models\Course\Course;
-use App\Models\Grade\Grade;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
@@ -25,7 +24,6 @@ class Content extends Model implements HasMedia
         'downloads',
         'duration',
         'course_id',
-        'grade_id',
     ];
 
     protected $casts = [
@@ -38,16 +36,11 @@ class Content extends Model implements HasMedia
         return $this->belongsTo(Course::class);
     }
 
-    public function grade()
-    {
-        return $this->belongsTo(Grade::class);
-    }
-
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('content_files')
-            ->singleFile()
-            ->useDisk('public');
+             ->singleFile()
+             ->useDisk('public');
     }
 
     public function getFilePathAttribute()

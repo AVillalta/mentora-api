@@ -2,7 +2,7 @@
 
 namespace App\Models\Grade;
 
-use App\Models\Content\Content;
+use App\Models\Assignment\Assignment;
 use App\Models\Enrollment\Enrollment;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,6 +18,7 @@ class Grade extends Model
         'grade_value',
         'grade_date',
         'enrollment_id',
+        'assignment_id',
     ];
 
     protected $casts = [
@@ -30,8 +31,8 @@ class Grade extends Model
         return $this->belongsTo(Enrollment::class);
     }
 
-    public function contents()
+    public function assignment()
     {
-        return $this->hasMany(Content::class); 
+        return $this->belongsTo(Assignment::class);
     }
 }

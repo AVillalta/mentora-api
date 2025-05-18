@@ -7,6 +7,7 @@ use App\Http\Requests\Assignment\AssignmentStoreRequest;
 use App\Http\Requests\Assignment\AssignmentUpdateRequest;
 use App\Http\Resources\Assignment\AssignmentResource;
 use App\Models\Assignment\Assignment;
+use App\Models\User\User;
 use App\Services\Assignment\AssignmentService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
@@ -57,7 +58,28 @@ class AssignmentController extends Controller
 
         $result = $this->assignmentService->submitAssignment($assignment, $request->file('file'), $student);
 
-        return $this->successResponse($result, Response::HTTP_CREATED);
+        return $this->successResponse([
+            'submission_id' => $result->id,
+            'file_name' => $result->file_name,
+            'url' => $result->getUrl(),
+        ], Response::HTTP_CREATED);
+    }
+
+    public function gradeSubmission(Request $request, Assignment $assignment, string $submissionId)
+    {
+        $request->validate([
+            'grade_value' => 'required|numeric|min:0|max:10',
+            'student_id' => 'required|uuid|exists:users,id',
+        ]);
+
+        $student = User::findOrFail($request->input('student_id'));
+        $result = $this->assignmentService->gradeSubmission($assignment, $submissionId, $request->grade_value, $student);
+
+        return $this->successResponse([
+            'grade_id' => $result->id,
+            'grade_value' => $result->grade_value,
+            'grade_date' => $result->grade_date,
+        ], Response::HTTP_OK);
     }
 
     public function show($id)

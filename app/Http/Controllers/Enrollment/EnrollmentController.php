@@ -7,21 +7,19 @@ use App\Http\Requests\Enrollment\EnrollmentStoreRequest;
 use App\Http\Requests\Enrollment\EnrollmentUpdateRequest;
 use App\Http\Resources\Enrollment\EnrollmentResource;
 use App\Models\Enrollment\Enrollment;
-use App\Traits\ApiResponse;
-use Illuminate\Http\Request;
 use App\Services\Enrollment\EnrollmentService;
+use App\Traits\ApiResponse;
 use Illuminate\Http\Response;
 
 class EnrollmentController extends Controller
 {
-
     use ApiResponse;
 
-    protected $EnrollmentService;
+    protected $enrollmentService;
 
-    public function __construct(EnrollmentService $EnrollmentService)
+    public function __construct(EnrollmentService $enrollmentService)
     {
-        $this->EnrollmentService = $EnrollmentService;
+        $this->enrollmentService = $enrollmentService;
     }
 
     /**
@@ -29,13 +27,8 @@ class EnrollmentController extends Controller
      */
     public function index()
     {
-        $result = $this->EnrollmentService->getAllEnrollments();
-
-        if (isset($result[0]) && $result[0] instanceof Enrollment) {
-            $result = EnrollmentResource::collection($result);
-        }
-
-        return $this->successResponse($result, Response::HTTP_OK);
+        $result = $this->enrollmentService->getAllEnrollments();
+        return $this->successResponse(EnrollmentResource::collection($result), Response::HTTP_OK);
     }
 
     /**
@@ -44,17 +37,13 @@ class EnrollmentController extends Controller
     public function store(EnrollmentStoreRequest $request)
     {
         $data = $request->validated();
-        $result = $this->EnrollmentService->saveEnrollment($data);
+        $result = $this->enrollmentService->saveEnrollment($data);
 
-        if (optional($result)['example'] == false) {
-            return $this->errorResponse($result['message'], $result['httpStatus']);
+        if (is_array($result) && isset($result['message'])) {
+            return $this->errorResponse($result['message'], $result['status']);
         }
 
-        if ($result instanceof Enrollment) {
-            $result = new EnrollmentResource($result);
-        }
-
-        //return $this->successResponse($result, Response::HTTP_CREATED);
+        return $this->successResponse(new EnrollmentResource($result), Response::HTTP_CREATED);
     }
 
     /**
@@ -63,13 +52,13 @@ class EnrollmentController extends Controller
     public function show($id)
     {
         $data = ['enrollment_id' => $id];
-        $result = $this->EnrollmentService->showEnrollment($data);
+        $result = $this->enrollmentService->showEnrollment($data);
 
-        if ($result instanceof Enrollment) {
-            $result = new EnrollmentResource($result);
+        if (is_array($result) && isset($result['message'])) {
+            return $this->errorResponse($result['message'], $result['status']);
         }
 
-        return $this->successResponse($result, Response::HTTP_OK);
+        return $this->successResponse(new EnrollmentResource($result), Response::HTTP_OK);
     }
 
     /**
@@ -78,13 +67,13 @@ class EnrollmentController extends Controller
     public function update(EnrollmentUpdateRequest $request, $id)
     {
         $data = $request->validated();
-        $result = $this->EnrollmentService->updateEnrollment($data, $id);
+        $result = $this->enrollmentService->updateEnrollment($data, $id);
 
-        if ($result instanceof Enrollment) {
-            $result = new EnrollmentResource($result);
+        if (is_array($result) && isset($result['message'])) {
+            return $this->errorResponse($result['message'], $result['status']);
         }
 
-        return $this->successResponse($result, Response::HTTP_OK);
+        return $this->successResponse(new EnrollmentResource($result), Response::HTTP_OK);
     }
 
     /**
@@ -92,8 +81,12 @@ class EnrollmentController extends Controller
      */
     public function destroy($id)
     {
-        $result = $this->EnrollmentService->deleteEnrollment($id);
+        $result = $this->enrollmentService->deleteEnrollment($id);
 
-        return $this->successResponse($result, Response::HTTP_NO_CONTENT);
+        if (is_array($result) && isset($result['message'])) {
+            return $this->errorResponse($result['message'], $result['status']);
+        }
+
+        return $this->successResponse(null, Response::HTTP_NO_CONTENT);
     }
 }

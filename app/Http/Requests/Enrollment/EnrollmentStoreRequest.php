@@ -12,13 +12,13 @@ class EnrollmentStoreRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return auth()->user()->hasAnyRole(['admin']) && auth()->user()->hasPermissionTo('create-enrollments');
     }
 
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, \Illuminate\Contracts\Validation\Rule|array|string>
      */
     public function rules(): array
     {
@@ -29,19 +29,21 @@ class EnrollmentStoreRequest extends FormRequest
         ];
     }
 
-     /**
+    /**
      * Get custom error messages for validation rules.
      */
     public function messages(): array
     {
         return [
-            'course_id.required' => 'The :attribute field is required.',
-            'course_id.exists' => 'The selected :attribute does not exist.',
-            'student_id.required' => 'The :attribute field is required.',
-            'student_id.exists' => 'The selected :attribute does not exist.',
-            'enrollment_date.required' => 'The :attribute is required.',
-            'enrollment_date.date' => 'The :attribute must be a valid date.',
-            'enrollment_date.before_or_equal' => 'The :attribute cannot be in the future.',
+            'course_id.required' => 'El ID del curso es obligatorio.',
+            'course_id.uuid' => 'El ID del curso debe ser un UUID válido.',
+            'course_id.exists' => 'El curso seleccionado no existe.',
+            'student_id.required' => 'El ID del estudiante es obligatorio.',
+            'student_id.uuid' => 'El ID del estudiante debe ser un UUID válido.',
+            'student_id.exists' => 'El estudiante seleccionado no existe.',
+            'enrollment_date.required' => 'La fecha de matrícula es obligatoria.',
+            'enrollment_date.date' => 'La fecha de matrícula debe ser una fecha válida.',
+            'enrollment_date.before_or_equal' => 'La fecha de matrícula no puede ser futura.',
         ];
     }
 }

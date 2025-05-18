@@ -19,7 +19,6 @@ class Assignment extends Model implements HasMedia
         'title',
         'description',
         'course_id',
-        'grade_id',
         'due_date',
         'points',
         'submissions',
@@ -38,15 +37,15 @@ class Assignment extends Model implements HasMedia
         return $this->belongsTo(Course::class);
     }
 
-    public function grade()
+    public function grades()
     {
-        return $this->belongsTo(Grade::class);
+        return $this->hasMany(Grade::class);
     }
 
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('assignment_submissions')
-            ->useDisk('public');
+             ->useDisk('public');
     }
 
     public function addSubmission(UploadedFile $file, User $student)
