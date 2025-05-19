@@ -7,36 +7,34 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class EnrollmentResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
-        $this->loadMissing('course.semester');
-        //return parent::toArray($request);
+        // Cargar todas las relaciones necesarias
+        $this->loadMissing(['student', 'course', 'course.signature', 'course.semester']);
+
         return [
             'id' => $this->id,
-            'enrollment_date' => $this->enrollment_date,
-            'course' => [
+            'course_id' => $this->course_id,
+            'student_id' => $this->student_id,
+            'student_name' => $this->student ? $this->student->name : 'Estudiante desconocido',
+            'course_name' => $this->course && $this->course->signature ? $this->course->signature->name : 'Curso desconocido',
+            'enrollment_date' => $this->enrollment_date ? $this->enrollment_date->toIso8601String() : null,
+            'created_at' => $this->created_at->toIso8601String(),
+            'final_grade' => $this->final_grade,
+            // Campos anidados para compatibilidad
+            'course' => $this->course ? [
                 'id' => $this->course_id,
                 'schedule' => $this->course->schedule,
-            ],
-            'signature' => [
+            ] : null,
+            'signature' => $this->course && $this->course->signature ? [
                 'id' => $this->course->signature->signature_id,
                 'name' => $this->course->signature->name,
-            ],
-            'semester' => [
-                'id' => $this->course->semester->first()->id,
-                'start_date' => $this->course->semester->first()->start_date,
-                'end_date' => $this->course->semester->first()->end_date,
-            ],
-            'student' => [
-                'id' => $this->student_id,
-                'name' => $this->student->name,
-            ],
-            'final_grade' => $this->final_grade,
+            ] : null,
+            'semester' => $this->course && $this->course->semester ? [
+                'id' => $this->course->semester->id,
+                'start_date' => $this->course->semester->start_date,
+                'end_date' => $this->course->semester->end_date,
+            ] : null,
         ];
     }
 }

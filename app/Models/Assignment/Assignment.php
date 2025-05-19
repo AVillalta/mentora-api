@@ -55,7 +55,7 @@ class Assignment extends Model implements HasMedia
                     ->toMediaCollection('assignment_submissions');
     }
 
-    public function getSubmissionsAttribute()
+    public function getSubmissionsFilesAttribute()
     {
         return $this->getMedia('assignment_submissions')->map(function ($media) {
             return [
@@ -64,7 +64,7 @@ class Assignment extends Model implements HasMedia
                 'url' => $media->getUrl(),
                 'size' => $media->size,
                 'student_id' => $media->getCustomProperty('student_id'),
-                'created_at' => $media->created_at,
+                'created_at' => $media->created_at->toIso8601String(),
             ];
         });
     }
