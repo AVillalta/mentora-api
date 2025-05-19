@@ -8,15 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('media', function (Blueprint $table) {
-            $table->uuid('model_id')->change();
+        Schema::table('courses', function (Blueprint $table) {
+            $table->string('code', 20)->unique()->after('id');
         });
     }
 
     public function down(): void
     {
-        Schema::table('media', function (Blueprint $table) {
-            $table->unsignedBigInteger('model_id')->change();
+        Schema::table('courses', function (Blueprint $table) {
+            $table->dropColumn('code');
         });
     }
 };

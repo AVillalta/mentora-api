@@ -16,13 +16,15 @@ class Semester extends Model
         'name',
         'start_date',
         'end_date',
-        'calendar'
+        'calendar',
+        'is_active'
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
-        'calendar' => 'array'
+        'calendar' => 'array',
+        'is_active' => 'boolean'
     ];
 
     public function getCalendarAttribute($value)

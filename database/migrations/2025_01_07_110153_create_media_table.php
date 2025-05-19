@@ -10,9 +10,10 @@ return new class extends Migration
     {
         Schema::create('media', function (Blueprint $table) {
             $table->id();
-
-            $table->morphs('model');
-            $table->uuid()->nullable()->unique();
+            $table->uuid('model_id'); // UUID para model_id
+            $table->string('model_type');
+            $table->index(['model_id', 'model_type']); // Índice para relaciones polimórficas
+            $table->uuid('uuid')->nullable()->unique(); // Restaurar columna uuid
             $table->string('collection_name');
             $table->string('name');
             $table->string('file_name');
@@ -25,14 +26,10 @@ return new class extends Migration
             $table->json('generated_conversions');
             $table->json('responsive_images');
             $table->unsignedInteger('order_column')->nullable()->index();
-
             $table->nullableTimestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('media');

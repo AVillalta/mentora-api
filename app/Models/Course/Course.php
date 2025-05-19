@@ -13,10 +13,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Course extends Model
 {
-    
     use HasUuids;
 
     protected $fillable = [
+        'code',
         'schedule',
         'weighting',
         'signature_id',
@@ -51,7 +51,6 @@ class Course extends Model
     protected static function booted()
     {
         parent::boot();
-
         static::addGlobalScope(new ProfessorScope);
     }
 }

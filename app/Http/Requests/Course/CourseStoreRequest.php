@@ -6,24 +6,17 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class CourseStoreRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
+            'code' => ['required', 'string', 'max:20', 'unique:courses'],
             'schedule' => ['nullable', 'array'],
-            'weighting' => ['required', 'array', 'size:3'], // Must be an array with 3 elements
+            'weighting' => ['required', 'array', 'size:3'],
             'weighting.homework' => ['required', 'numeric', 'min:0', 'max:1'],
             'weighting.midterms' => ['required', 'numeric', 'min:0', 'max:1'],
             'weighting.final_exam' => ['required', 'numeric', 'min:0', 'max:1'],
@@ -37,24 +30,23 @@ class CourseStoreRequest extends FormRequest
         $validator->after(function ($validator) {
             $weighting = $this->input('weighting', []);
             $sum = array_sum($weighting);
-            
             if (abs($sum - 1) > 0.0001) {
                 $validator->errors()->add('weighting', 'The weighting values must add up to 1.');
             }
         });
     }
 
-     /**
-     * Get custom error messages for validation rules.
-     */
     public function messages(): array
     {
         return [
-            'schedule.array' => 'The :attribute field must be an array.',
-
-            'weighting.required' => 'The :attribute field is required.',
-            'weighting.array' => 'The :attribute field must be an array.',
-            'weighting.size' => 'The :attribute array must contain exactly 3 elements.',
+            'code.required' => 'The code field is required.',
+            'code.string' => 'The code must be a string.',
+            'code.max' => 'The code may not be greater than 20 characters.',
+            'code.unique' => 'The code has already been taken.',
+            'schedule.array' => 'The schedule field must be an array.',
+            'weighting.required' => 'The weighting field is required.',
+            'weighting.array' => 'The weighting field must be an array.',
+            'weighting.size' => 'The weighting array must contain exactly 3 elements.',
             'weighting.homework.required' => 'The homework weighting is required.',
             'weighting.homework.numeric' => 'The homework weighting must be a numeric value.',
             'weighting.homework.min' => 'The homework weighting must be at least :min.',
@@ -67,12 +59,10 @@ class CourseStoreRequest extends FormRequest
             'weighting.final_exam.numeric' => 'The final exam weighting must be a numeric value.',
             'weighting.final_exam.min' => 'The final exam weighting must be at least :min.',
             'weighting.final_exam.max' => 'The final exam weighting must not exceed :max.',
-
-            'signature_id.required' => 'The :attribute field is required.',
-            'signature_id.exists' => 'The :attribute signature does not exist.',
-
-            'semester_id.required' => 'The :attribute field is required.',
-            'semester_id.exists' => 'The :attribute semester does not exist.',
+            'signature_id.required' => 'The signature field is required.',
+            'signature_id.exists' => 'The signature does not exist.',
+            'semester_id.required' => 'The semester field is required.',
+            'semester_id.exists' => 'The semester does not exist.',
         ];
     }
 }

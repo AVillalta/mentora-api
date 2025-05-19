@@ -3,73 +3,49 @@
 namespace App\Services\Semester;
 
 use App\Models\Semester\Semester;
-use Illuminate\Http\Request;
-use Exception;
-use Illuminate\Support\Arr;
-use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
-use InvalidArgumentException;
-use PhpParser\Node\Expr\FuncCall;
 
-class SemesterService{
-
-    /**
-     * get all semesters.
-     *
-     * @param
-     * @return \Illuminate\Database\Eloquent\Collection|\App\Models\Semester[]
-     */
-    public function getAllSemesters() {
+class SemesterService
+{
+    public function getAllSemesters()
+    {
         return Semester::all();
     }
 
-     /**
-     * Create new semester.
-     *
-     * @param array $data
-     * @return \App\Models\Semester
-     */
-    public function saveSemester(array $data) {
-
-        return DB::transaction(function() use ($data){
+    public function saveSemester(array $data)
+    {
+        return DB::transaction(function () use ($data) {
+            if (isset($data['is_active']) && $data['is_active']) {
+                Semester::where('is_active', true)->update(['is_active' => false]);
+            }
             return Semester::create([
                 'name' => $data['name'],
                 'start_date' => $data['start_date'],
                 'end_date' => $data['end_date'],
-                'calendar' => $data['calendar']
+                'calendar' => $data['calendar'],
+                'is_active' => $data['is_active'] ?? false,
             ]);
         });
     }
 
-    /**
-     * Get semester by id.
-     *
-     * @param $data
-     * @return \App\Models\Semester
-     */
     public function showSemester($data)
     {
-        $result = Semester::findOrFail($data["Semester_id"]);
-        return $result;
+        return Semester::findOrFail($data["Semester_id"]);
     }
 
-     /**
-     * Update semester.
-     *
-     * @param array $data
-     * @return \App\Models\Semester
-     */
-    public function updateSemester(array $data, $id) {
-
+    public function updateSemester(array $data, $id)
+    {
         $semester = Semester::findOrFail($id);
-
-        return DB::transaction(function() use ($semester, $data){
-            $updates =  [
+        return DB::transaction(function () use ($semester, $data) {
+            if (isset($data['is_active']) && $data['is_active']) {
+                Semester::where('is_active', true)->where('id', '!=', $semester->id)->update(['is_active' => false]);
+            }
+            $updates = [
                 'name' => $data['name'] ?? $semester->name,
-                'start_date' =>  $data['start_date'] ?? $semester->start_date,
+                'start_date' => $data['start_date'] ?? $semester->start_date,
                 'end_date' => $data['end_date'] ?? $semester->end_date,
                 'calendar' => $data['calendar'] ?? $semester->calendar,
+                'is_active' => $data['is_active'] ?? $semester->is_active,
             ];
             $semester->update($updates);
             return $semester;
@@ -78,11 +54,9 @@ class SemesterService{
 
     public function deleteSemester($id)
     {
-        DB::transaction(function() use ($id) {
+        return DB::transaction(function () use ($id) {
             $semester = Semester::findOrFail($id);
             $semester->delete();
         });
     }
-
 }
-

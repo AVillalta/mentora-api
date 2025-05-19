@@ -4,22 +4,15 @@ namespace App\Http\Requests\Semester;
 
 use App\Data\Semester\SemesterCalendarData;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\DB;
 
 class SemesterStoreRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
@@ -27,29 +20,30 @@ class SemesterStoreRequest extends FormRequest
             'start_date' => ['required', 'date', 'before:end_date'],
             'end_date' => ['required', 'date', 'after:start_date'],
             'calendar' => ['nullable', 'array'],
+            'is_active' => ['sometimes', 'boolean'],
         ];
     }
 
-    /**
-     * Get custom attributes for validator errors.
-     *
-     * @return array
-     */
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            if ($this->input('is_active') && DB::table('semesters')->where('is_active', true)->exists()) {
+                $validator->errors()->add('is_active', 'Ya existe un semestre activo.');
+            }
+        });
+    }
+
     public function attributes()
     {
         return [
             'name' => 'semester name',
             'start_date' => 'start date',
             'end_date' => 'end date',
-            'calendar' => 'calendar'
+            'calendar' => 'calendar',
+            'is_active' => 'active status',
         ];
     }
 
-    /**
-     * Get the error messages for the defined validation rules.
-     *
-     * @return array
-     */
     public function messages()
     {
         return [
@@ -59,22 +53,17 @@ class SemesterStoreRequest extends FormRequest
             'start_date.before' => 'The :attribute must be before the end date.',
             'end_date.required' => 'The :attribute field is required.',
             'end_date.after' => 'The :attribute must be after the start date.',
-            'calendar.json' => 'The :attribute must be valid JSON.',
+            'calendar.array' => 'The :attribute must be an array.',
+            'is_active.boolean' => 'The :attribute must be a boolean.',
         ];
     }
 
-    /**
-     * Transform the validated data into a structured format using DTO
-     *
-     * @return array
-     */
-    public function validatedData() : array 
+    public function validatedData(): array
     {
         $validated = $this->validated();
         $validated['calendar'] = isset($validated['calendar'])
             ? SemesterCalendarData::fromArray($validated['calendar'], true)
             : new SemesterCalendarData();
-
         return $validated;
     }
 }
