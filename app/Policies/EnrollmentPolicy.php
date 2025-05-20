@@ -13,7 +13,7 @@ class EnrollmentPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->hasAnyRole(['admin']) && $user->hasPermissionTo('view-enrollments');
     }
 
     /**
@@ -21,7 +21,7 @@ class EnrollmentPolicy
      */
     public function view(User $user, Enrollment $enrollment): bool
     {
-        return false;
+        return $user->hasAnyRole(['admin']) && $user->hasPermissionTo('view-enrollments');
     }
 
     /**
@@ -29,7 +29,7 @@ class EnrollmentPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->hasAnyRole(['admin']) && $user->hasPermissionTo('create-enrollments');
     }
 
     /**
@@ -37,7 +37,7 @@ class EnrollmentPolicy
      */
     public function update(User $user, Enrollment $enrollment): bool
     {
-        return false;
+        return $user->hasAnyRole(['admin']) && $user->hasPermissionTo('edit-enrollments');
     }
 
     /**
@@ -45,7 +45,7 @@ class EnrollmentPolicy
      */
     public function delete(User $user, Enrollment $enrollment): bool
     {
-        return false;
+        return $user->hasAnyRole(['admin']) && $user->hasPermissionTo('delete-enrollments');
     }
 
     /**
@@ -53,7 +53,7 @@ class EnrollmentPolicy
      */
     public function restore(User $user, Enrollment $enrollment): bool
     {
-        return false;
+        return $user->hasAnyRole(['admin']) && $user->hasPermissionTo('edit-enrollments');
     }
 
     /**
@@ -61,6 +61,6 @@ class EnrollmentPolicy
      */
     public function forceDelete(User $user, Enrollment $enrollment): bool
     {
-        return false;
+        return $user->hasAnyRole(['admin']) && $user->hasPermissionTo('delete-enrollments');
     }
 }
