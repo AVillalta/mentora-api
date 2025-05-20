@@ -4,8 +4,8 @@ namespace App\Http\Requests\Semester;
 
 use App\Data\Semester\SemesterCalendarData;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class SemesterUpdateRequest extends FormRequest
 {
@@ -17,7 +17,7 @@ class SemesterUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['sometimes', 'string', 'max:255', Rule::unique('semesters')->ignore($this->semester)],
+            'name' => ['sometimes', 'string', 'max:255', Rule::unique('semesters')->ignore($this->route('semester'))],
             'start_date' => ['sometimes', 'date', 'before:end_date'],
             'end_date' => ['sometimes', 'date', 'after:start_date'],
             'calendar' => ['nullable', 'array'],
@@ -28,27 +28,37 @@ class SemesterUpdateRequest extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
-            if ($this->input('is_active') && DB::table('semesters')->where('is_active', true)->where('id', '!=', $this->semester)->exists()) {
-                $validator->errors()->add('is_active', 'Ya existe otro semestre activo.');
+            if (
+                $this->input('is_active') &&
+                DB::table('semesters')
+                    ->where('is_active', true)
+                    ->where('id', '!=', $this->route('semester'))
+                    ->exists()
+            ) {
+                $validator->errors()->add('is_active', 'Ya existe un semestre activo.');
             }
         });
     }
 
-    public function messages(): array
+    public function attributes()
     {
         return [
-            'name.sometimes' => 'The :attribute field is optional, but if provided, it must be a string.',
-            'name.string' => 'The :attribute must be a string.',
-            'name.max' => 'The :attribute may not be greater than 255 characters.',
-            'name.unique' => 'The :attribute has already been taken.',
-            'start_date.sometimes' => 'The :attribute field is optional, but if provided, it must be a valid date.',
-            'start_date.date' => 'The :attribute must be a valid date.',
-            'start_date.before' => 'The :attribute must be before the end date.',
-            'end_date.sometimes' => 'The :attribute field is optional, but if provided, it must be a valid date.',
-            'end_date.date' => 'The :attribute must be a valid date.',
-            'end_date.after' => 'The :attribute must be after the start date.',
-            'calendar.array' => 'The :attribute must be an array.',
-            'is_active.boolean' => 'The :attribute must be a boolean.',
+            'name' => 'nombre del semestre',
+            'start_date' => 'fecha de inicio',
+            'end_date' => 'fecha de fin',
+            'calendar' => 'calendario',
+            'is_active' => 'estado activo',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'name.unique' => 'Ya existe un semestre con este :attribute.',
+            'start_date.before' => 'La :attribute debe ser anterior a la fecha de fin.',
+            'end_date.after' => 'La :attribute debe ser posterior a la fecha de inicio.',
+            'calendar.array' => 'El :attribute debe ser un array.',
+            'is_active.boolean' => 'El :attribute debe ser un valor booleano.',
         ];
     }
 

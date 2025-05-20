@@ -9,12 +9,17 @@ class SemesterService
 {
     public function getAllSemesters()
     {
-        return Semester::all();
+        return Semester::withCount(['courses', 'enrollments'])->get();
     }
 
     public function saveSemester(array $data)
     {
         return DB::transaction(function () use ($data) {
+            // Si no hay semestres activos y is_active no está especificado, marcar como activo
+            if (!isset($data['is_active']) && !Semester::where('is_active', true)->exists()) {
+                $data['is_active'] = true;
+            }
+            // Desactivar otros semestres si el nuevo es activo
             if (isset($data['is_active']) && $data['is_active']) {
                 Semester::where('is_active', true)->update(['is_active' => false]);
             }
@@ -37,6 +42,7 @@ class SemesterService
     {
         $semester = Semester::findOrFail($id);
         return DB::transaction(function () use ($semester, $data) {
+            // Desactivar otros semestres si el actual se marca como activo
             if (isset($data['is_active']) && $data['is_active']) {
                 Semester::where('is_active', true)->where('id', '!=', $semester->id)->update(['is_active' => false]);
             }

@@ -6,6 +6,7 @@ use App\Data\Semester\SemesterCalendarData;
 use App\Models\Course\Course;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Signature\Signature;
+use App\Models\Enrollment\Enrollment;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Semester extends Model
@@ -52,5 +53,10 @@ class Semester extends Model
     public function courses()
     {
         return $this->hasMany(Course::class, 'semester_id');
+    }
+
+    public function enrollments()
+    {
+        return $this->hasManyThrough(Enrollment::class, Course::class, 'semester_id', 'course_id');
     }
 }

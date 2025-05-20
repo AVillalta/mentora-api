@@ -16,6 +16,8 @@ class SemesterResource extends JsonResource
             'end_date' => $this->end_date,
             'calendar' => $this->calendar,
             'is_active' => $this->is_active,
+            'courses_count' => $this->courses_count ?? $this->courses()->count(),
+            'enrollments_count' => $this->enrollments_count ?? $this->enrollments()->count(),
         ];
     }
 }

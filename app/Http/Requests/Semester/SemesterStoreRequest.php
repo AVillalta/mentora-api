@@ -36,25 +36,25 @@ class SemesterStoreRequest extends FormRequest
     public function attributes()
     {
         return [
-            'name' => 'semester name',
-            'start_date' => 'start date',
-            'end_date' => 'end date',
-            'calendar' => 'calendar',
-            'is_active' => 'active status',
+            'name' => 'nombre del semestre',
+            'start_date' => 'fecha de inicio',
+            'end_date' => 'fecha de fin',
+            'calendar' => 'calendario',
+            'is_active' => 'estado activo',
         ];
     }
 
     public function messages()
     {
         return [
-            'name.required' => 'The :attribute field is required.',
-            'name.unique' => 'A semester with this :attribute already exists.',
-            'start_date.required' => 'The :attribute field is required.',
-            'start_date.before' => 'The :attribute must be before the end date.',
-            'end_date.required' => 'The :attribute field is required.',
-            'end_date.after' => 'The :attribute must be after the start date.',
-            'calendar.array' => 'The :attribute must be an array.',
-            'is_active.boolean' => 'The :attribute must be a boolean.',
+            'name.required' => 'El :attribute es obligatorio.',
+            'name.unique' => 'Ya existe un semestre con este :attribute.',
+            'start_date.required' => 'La :attribute es obligatoria.',
+            'start_date.before' => 'La :attribute debe ser anterior a la fecha de fin.',
+            'end_date.required' => 'La :attribute es obligatoria.',
+            'end_date.after' => 'La :attribute debe ser posterior a la fecha de inicio.',
+            'calendar.array' => 'El :attribute debe ser un array.',
+            'is_active.boolean' => 'El :attribute debe ser un valor booleano.',
         ];
     }
 
