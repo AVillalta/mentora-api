@@ -32,8 +32,7 @@ class Signature extends Model implements HasMedia
     {
         $this->addMediaCollection('syllabus_pdf')
              ->singleFile() 
-             ->useDisk('public') 
-             ->setPath('syllabus_pdfs/' . $this->id); 
+             ->useDisk('public');
     }
 
     public function getSyllabusPdfAttribute()
