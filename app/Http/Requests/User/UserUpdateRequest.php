@@ -7,6 +7,7 @@ use App\Models\User\User;
 use App\Rules\PhoneValidation;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 
 class UserUpdateRequest extends FormRequest
 {
@@ -25,10 +26,9 @@ class UserUpdateRequest extends FormRequest
      */
     protected function prepareForValidation()
     {
-        
         if ($this->has('role')) {
             $this->merge([
-                'role' => strtolower($this->input('role')), 
+                'role' => strtolower($this->input('role')),
             ]);
         }
     }
@@ -40,24 +40,62 @@ class UserUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
+        // Intentar obtener el ID desde la ruta
         $userId = $this->route('id');
+
+        // Depuración detallada
+        Log::debug('UserUpdateRequest: Datos de la solicitud', [
+            'userId' => $userId,
+            'routeParameters' => $this->route()->parameters(),
+            'input' => $this->all(),
+            'routeName' => $this->route()->getName(),
+        ]);
+
+        if (!$userId) {
+            Log::error('UserUpdateRequest: No se pudo obtener userId desde $this->route("id")');
+            // Intentar obtener el ID desde el parámetro 'user' o 'id' como string
+            $user = $this->route('user') ?? $this->route('id');
+            $userId = is_string($user) ? $user : ($user instanceof User ? $user->id : null);
+            Log::debug('UserUpdateRequest: Intentando userId desde $this->route("user") o $this->route("id")', [
+                'userId' => $userId,
+                'userType' => gettype($user),
+                'userValue' => $user,
+            ]);
+        }
+
+        if (!$userId) {
+            Log::error('UserUpdateRequest: No se encontró userId válido, usando validación sin unicidad');
+            return [
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'string', 'lowercase', 'email', 'max:255'],
+                'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
+                'phone_number' => ['nullable', new PhoneValidation],
+                'document' => ['nullable', 'string', 'max:15'],
+                'city' => ['nullable', 'string', 'max:255'],
+                'postal_code' => ['nullable', 'string', 'max:10'],
+                'address' => ['nullable', 'string', 'max:255'],
+                'date_of_birth' => ['nullable', 'date', 'before:today'],
+                'country_id' => ['nullable', 'exists:countries,id'],
+                'role' => ['nullable', 'string', 'in:admin,professor,student'],
+            ];
+        }
+
         return [
-            'name' => ['required', 'string', 'max:255', Rule::unique('users')->ignore($userId)],//ignore($this->user()->id)
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique("users")->ignore($userId)], // Permitir el correo electrónico actual
-            'password' => ['nullable', 'confirmed', Rules\Password::defaults()], // Si el campo de contraseña es nulo, no se valida
+            'name' => ['required', 'string', 'max:255', Rule::unique('users', 'name')->ignore($userId, 'id')],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId, 'id')],
+            'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
             'phone_number' => ['nullable', new PhoneValidation],
-            'document' => ['nullable', 'string', 'max:15', Rule::unique('users')->ignore($userId)], // Permitir el documento actual
+            'document' => ['nullable', 'string', 'max:15', Rule::unique('users', 'document')->ignore($userId, 'id')],
             'city' => ['nullable', 'string', 'max:255'],
             'postal_code' => ['nullable', 'string', 'max:10'],
             'address' => ['nullable', 'string', 'max:255'],
             'date_of_birth' => ['nullable', 'date', 'before:today'],
             'country_id' => ['nullable', 'exists:countries,id'],
-
             'role' => ['nullable', 'string', 'in:admin,professor,student'],
         ];
     }
 
-     /**
+    /**
      * Get the error messages for the defined validation rules.
      *
      * @return array
@@ -65,50 +103,50 @@ class UserUpdateRequest extends FormRequest
     public function messages()
     {
         return [
-            'name.required' => 'The :attribute field is required.',
-            'name.string' => 'The :attribute must be a string.',
-            'name.max' => 'The :attribute may not be greater than 255 characters.',
-            'name.unique' => 'This :attribute is already taken.',
+            'name.required' => 'El campo nombre es obligatorio.',
+            'name.string' => 'El nombre debe ser una cadena de texto.',
+            'name.max' => 'El nombre no puede exceder los 255 caracteres.',
+            'name.unique' => 'Este nombre ya está en uso.',
             
-            'email.required' => 'The :attribute field is required.',
-            'email.string' => 'The :attribute must be a string.',
-            'email.email' => 'The :attribute must be a valid email address.',
-            'email.max' => 'The :attribute may not be greater than 255 characters.',
-            'email.unique' => 'This :attribute is already taken.',
+            'email.required' => 'El campo correo electrónico es obligatorio.',
+            'email.string' => 'El correo electrónico debe ser una cadena de texto.',
+            'email.email' => 'El correo electrónico debe ser una dirección válida.',
+            'email.max' => 'El correo electrónico no puede exceder los 255 caracteres.',
+            'email.unique' => 'Este correo electrónico ya está en uso.',
             
-            'password.nullable' => 'The :attribute field is optional.',
-            'password.confirmed' => 'The :attribute confirmation does not match.',
-            'password.default' => 'The :attribute does not meet the required criteria.',
+            'password.nullable' => 'El campo contraseña es opcional.',
+            'password.confirmed' => 'La confirmación de la contraseña no coincide.',
+            'password.default' => 'La contraseña debe tener al menos 8 caracteres.',
             
-            'phone_number.nullable' => 'The :attribute field is optional.',
-            'phone_number.string' => 'The :attribute must be a string.',
+            'phone_number.nullable' => 'El campo número de teléfono es opcional.',
+            'phone_number.string' => 'El número de teléfono debe ser una cadena de texto.',
             
-            'document.nullable' => 'The :attribute field is optional.',
-            'document.string' => 'The :attribute must be a string.',
-            'document.max' => 'The :attribute may not be greater than 15 characters.',
-            'document.unique' => 'This :attribute already exists.',
+            'document.nullable' => 'El campo documento es opcional.',
+            'document.string' => 'El documento debe ser una cadena de texto.',
+            'document.max' => 'El documento no puede exceder los 15 caracteres.',
+            'document.unique' => 'Este documento ya está en uso.',
             
-            'city.nullable' => 'The :attribute field is optional.',
-            'city.string' => 'The :attribute must be a string.',
-            'city.max' => 'The :attribute may not be greater than 255 characters.',
+            'city.nullable' => 'El campo ciudad es opcional.',
+            'city.string' => 'La ciudad debe ser una cadena de texto.',
+            'city.max' => 'La ciudad no puede exceder los 255 caracteres.',
             
-            'postal_code.nullable' => 'The :attribute field is optional.',
-            'postal_code.string' => 'The :attribute must be a string.',
-            'postal_code.max' => 'The :attribute may not be greater than 10 characters.',
+            'postal_code.nullable' => 'El campo código postal es opcional.',
+            'postal_code.string' => 'El código postal debe ser una cadena de texto.',
+            'postal_code.max' => 'El código postal no puede exceder los 10 caracteres.',
             
-            'address.nullable' => 'The :attribute field is optional.',
-            'address.string' => 'The :attribute must be a string.',
-            'address.max' => 'The :attribute may not be greater than 255 characters.',
+            'address.nullable' => 'El campo dirección es opcional.',
+            'address.string' => 'La dirección debe ser una cadena de texto.',
+            'address.max' => 'La dirección no puede exceder los 255 caracteres.',
             
-            'date_of_birth.nullable' => 'The :attribute field is optional.',
-            'date_of_birth.date' => 'The :attribute must be a valid date.',
-            'date_of_birth.before' => 'The :attribute must be before today.',
+            'date_of_birth.nullable' => 'El campo fecha de nacimiento es opcional.',
+            'date_of_birth.date' => 'La fecha de nacimiento debe ser una fecha válida.',
+            'date_of_birth.before' => 'La fecha de nacimiento debe ser anterior a hoy.',
             
-            'country_id.nullable' => 'The :attribute field is optional.',
-            'country_id.exists' => 'The selected :attribute is invalid.',
+            'country_id.nullable' => 'El campo país es opcional.',
+            'country_id.exists' => 'El país seleccionado no es válido.',
             
-            'role.nullable' => 'The :attribute field is optional.',
-            'role.in' => 'The :attribute must be one of the following values: admin, professor, student.',
+            'role.nullable' => 'El campo rol es opcional.',
+            'role.in' => 'El rol debe ser uno de los siguientes valores: admin, professor, student.',
         ];
     }
 }

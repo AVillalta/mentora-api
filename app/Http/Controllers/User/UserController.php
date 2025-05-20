@@ -11,6 +11,8 @@ use App\Http\Resources\User\UserResource;
 use App\Services\User\UserService;
 use Illuminate\Http\Request;
 use App\Models\User\User;
+use Illuminate\Support\Facades\Log;
+
 
 class UserController extends Controller
 {
@@ -67,6 +69,7 @@ class UserController extends Controller
 
     public function update( UserUpdateRequest $request, $id)
     {
+
         $data = $request->validated();
 
         $result = $this->UserService->updateUser($data, $id);

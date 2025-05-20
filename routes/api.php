@@ -9,6 +9,7 @@ use App\Http\Controllers\Signature\SignatureController;
 use App\Http\Controllers\Course\CourseController;
 use App\Http\Controllers\Grade\GradeController;
 use App\Http\Controllers\Assignment\AssignmentController;
+use App\Http\Controllers\Country\CountryController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -27,6 +28,7 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:api')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/user', [AuthController::class, 'user']);
+        Route::get('/countries', [CountryController::class, 'index']);
 
         // Rutas exclusivas para admin
         Route::middleware('\Spatie\Permission\Middleware\RoleMiddleware:admin')->group(function () {
