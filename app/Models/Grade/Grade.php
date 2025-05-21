@@ -14,6 +14,7 @@ class Grade extends Model
 
     protected $fillable = [
         'id',
+        'title',
         'grade_type',
         'grade_value',
         'grade_date',

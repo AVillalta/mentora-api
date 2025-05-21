@@ -35,6 +35,7 @@ class GradeService{
 
         return DB::transaction(function() use ($data){
             return Grade::create([
+                'title' => $data['title'],
                 'grade_type' => $data['grade_type'],
                 'grade_value' => $data['grade_value'],
                 'grade_date' => $data['grade_date'],
@@ -67,6 +68,7 @@ class GradeService{
 
         return DB::transaction(function() use ($grade, $data){
             $updates =  [
+                'title' => $data['title'] ?? $grade->title,
                 'grade_type' => $data['grade_type'] ?? $grade->grade_type,
                 'grade_value' => $data['grade_value'] ?? $grade->grade_value,
                 'grade_date' => $data['grade_date'] ?? $grade->grade_date,

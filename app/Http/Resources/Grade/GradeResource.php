@@ -20,6 +20,7 @@ class GradeResource extends JsonResource
 
         return [
             'id' => $this->id,
+            'title' => $this->title,
             'grade_type' => $this->grade_type,
             'grade_value' => $this->grade_value,
             'grade_date' => $this->grade_date->format('Y-m-d'),

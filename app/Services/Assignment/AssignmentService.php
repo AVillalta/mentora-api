@@ -56,7 +56,8 @@ class AssignmentService
 
             $submission = $assignment->addSubmission($file, $student);
 
-            Grade::create([
+            Grade::updateOrCreate([
+                'title' => $assignment->title,
                 'grade_type' => 'work',
                 'grade_value' => null,
                 'grade_date' => now(),

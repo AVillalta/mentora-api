@@ -14,6 +14,7 @@ class GradeStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'title' => ['required', 'string', 'max:255'],
             'grade_type' => ['required', 'string', 'in:ordinary,extraordinary,work,partial,final'],
             'grade_value' => ['nullable', 'numeric', 'min:0', 'max:10'],
             'grade_date' => ['required', 'date'],
@@ -25,6 +26,9 @@ class GradeStoreRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'title.required' => 'El título es obligatorio.',
+            'title.string' => 'El título debe ser una cadena.',
+            'title.max' => 'El título no puede tener más de 255 caracteres.',
             'grade_type.required' => 'The :attribute is required.',
             'grade_type.in' => 'The :attribute must be one of the following: ordinary, extraordinary, work, partial, final.',
             'grade_value.numeric' => 'The :attribute must be a valid number.',
