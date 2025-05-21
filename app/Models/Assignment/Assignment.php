@@ -20,14 +20,12 @@ class Assignment extends Model implements HasMedia
         'description',
         'course_id',
         'due_date',
-        'points',
         'submissions',
         'total_students',
     ];
 
     protected $casts = [
         'due_date' => 'date',
-        'points' => 'integer',
         'submissions' => 'integer',
         'total_students' => 'integer',
     ];
@@ -50,6 +48,14 @@ class Assignment extends Model implements HasMedia
 
     public function addSubmission(UploadedFile $file, User $student)
     {
+        // Eliminar todos los archivos existentes del estudiante
+        $existingSubmissions = $this->getMedia('assignment_submissions')
+            ->where('custom_properties.student_id', $student->id);
+
+        foreach ($existingSubmissions as $submission) {
+            $submission->delete();
+        }
+
         return $this->addMedia($file)
                     ->withCustomProperties(['student_id' => $student->id])
                     ->toMediaCollection('assignment_submissions');

@@ -23,6 +23,10 @@ class AssignmentService
 
         return $assignments->map(function ($assignment) {
             $assignment->total_students = Enrollment::where('course_id', $assignment->course_id)->count();
+            $assignment->submissions = $assignment->getMedia('assignment_submissions')
+                ->pluck('custom_properties.student_id')
+                ->unique()
+                ->count();
             return $assignment;
         });
     }
@@ -36,7 +40,6 @@ class AssignmentService
                 'description' => $data['description'],
                 'course_id' => $data['course_id'],
                 'due_date' => $data['due_date'],
-                'points' => $data['points'],
                 'submissions' => 0,
                 'total_students' => $totalStudents,
             ]);
@@ -54,18 +57,38 @@ class AssignmentService
                 throw new \Exception("No estás matriculado en este curso.");
             }
 
+            $existingSubmission = $assignment->getMedia('assignment_submissions')
+                ->where('custom_properties.student_id', $student->id)
+                ->first();
+
             $submission = $assignment->addSubmission($file, $student);
 
-            Grade::updateOrCreate([
-                'title' => $assignment->title,
-                'grade_type' => 'work',
-                'grade_value' => null,
-                'grade_date' => now(),
-                'enrollment_id' => $enrollment->id,
-                'assignment_id' => $assignment->id,
-            ]);
+            Grade::updateOrCreate(
+                [
+                    'enrollment_id' => $enrollment->id,
+                    'assignment_id' => $assignment->id,
+                ],
+                [
+                    'title' => $assignment->title,
+                    'grade_type' => 'work',
+                    'grade_value' => null,
+                    'grade_date' => now(),
+                    'course_name' => $assignment->course->signature ?? 'Unknown Course',
+                ]
+            );
 
-            $assignment->increment('submissions');
+            if (!$existingSubmission) {
+                $assignment->increment('submissions');
+            }
+
+            // Verificar que no haya notas duplicadas
+            $gradeCount = Grade::where('assignment_id', $assignment->id)
+                               ->where('enrollment_id', $enrollment->id)
+                               ->count();
+            if ($gradeCount > 1) {
+                throw new \Exception("Se detectaron notas duplicadas para el estudiante.");
+            }
+
             return $submission;
         });
     }
@@ -74,6 +97,10 @@ class AssignmentService
     {
         $assignment = Assignment::findOrFail($data["assignment_id"]);
         $assignment->total_students = Enrollment::where('course_id', $assignment->course_id)->count();
+        $assignment->submissions = $assignment->getMedia('assignment_submissions')
+            ->pluck('custom_properties.student_id')
+            ->unique()
+            ->count();
         return $assignment;
     }
 
@@ -89,8 +116,10 @@ class AssignmentService
                 'description' => $data['description'] ?? $assignment->description,
                 'course_id' => $data['course_id'] ?? $assignment->course_id,
                 'due_date' => $data['due_date'] ?? $assignment->due_date,
-                'points' => $data['points'] ?? $assignment->points,
-                'submissions' => $data['submissions'] ?? $assignment->submissions,
+                'submissions' => $assignment->getMedia('assignment_submissions')
+                    ->pluck('custom_properties.student_id')
+                    ->unique()
+                    ->count(),
                 'total_students' => $totalStudents,
             ];
 
@@ -117,12 +146,24 @@ class AssignmentService
 
             $grade = Grade::where('assignment_id', $assignment->id)
                           ->where('enrollment_id', $enrollment->id)
-                          ->firstOrFail();
+                          ->first();
+
+            if (!$grade) {
+                throw new \Exception("No se encontró una nota para esta entrega.");
+            }
 
             $grade->update([
                 'grade_value' => $gradeValue,
                 'grade_date' => now(),
             ]);
+
+            // Verificar que no haya notas duplicadas
+            $gradeCount = Grade::where('assignment_id', $assignment->id)
+                               ->where('enrollment_id', $enrollment->id)
+                               ->count();
+            if ($gradeCount > 1) {
+                throw new \Exception("Se detectaron notas duplicadas para el estudiante.");
+            }
 
             return $grade;
         });

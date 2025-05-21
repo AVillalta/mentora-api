@@ -18,7 +18,6 @@ class AssignmentStoreRequest extends FormRequest
             'description' => 'required|string',
             'course_id' => 'required|uuid|exists:courses,id',
             'due_date' => 'required|date',
-            'points' => 'required|integer|min:0',
         ];
     }
 
@@ -34,9 +33,6 @@ class AssignmentStoreRequest extends FormRequest
             'course_id.exists' => 'El curso seleccionado no existe.',
             'due_date.required' => 'La fecha límite es obligatoria.',
             'due_date.date' => 'La fecha límite debe ser una fecha válida.',
-            'points.required' => 'Los puntos son obligatorios.',
-            'points.integer' => 'Los puntos deben ser un número entero.',
-            'points.min' => 'Los puntos no pueden ser negativos.',
         ];
     }
 }
