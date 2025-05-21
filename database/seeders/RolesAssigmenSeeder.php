@@ -25,6 +25,7 @@ class RolesAssigmenSeeder extends Seeder
                 'view-enrollments', 'create-enrollments', 'edit-enrollments',
                 'view-grades', 'create-grades', 'edit-grades', 'delete-grades',
                 'view-contents', 'create-contents', 'edit-contents', 'delete-contents',
+                'view-assignments', 'create-assignments', 'edit-assignments', 'delete-assignments',
             ],
             'student' => [
                 'view-users',
@@ -34,6 +35,7 @@ class RolesAssigmenSeeder extends Seeder
                 'view-enrollments',
                 'view-grades',
                 'view-contents',
+                'view-assignments',
             ],
         ];
 

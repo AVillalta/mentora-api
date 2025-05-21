@@ -36,6 +36,8 @@ Route::prefix('v1')->group(function () {
             Route::apiResource('semesters', SemesterController::class);
             Route::apiResource('signatures', SignatureController::class);
             Route::apiResource('courses', CourseController::class);
+            Route::put('courses/{course}', [CourseController::class, 'update']);
+            Route::delete('courses/{course}', [CourseController::class, 'destroy']);
             Route::apiResource('enrollments', EnrollmentController::class);
             Route::apiResource('grades', GradeController::class);
             Route::apiResource('contents', ContentController::class);
@@ -46,6 +48,10 @@ Route::prefix('v1')->group(function () {
         // Rutas accesibles para admin, student y professor
         Route::middleware('\App\Http\Middleware\MultiRoleMiddleware:admin,student,professor')->group(function () {
             Route::get('/courses', [CourseController::class, 'index']);
+            Route::get('/courses/{course}', [CourseController::class, 'show']);
+            Route::get('/courses/{course}/grades', [GradeController::class, 'indexByCourse']);
+            Route::get('/courses/{course}/contents', [ContentController::class, 'indexByCourse']);
+            Route::get('/courses/{course}/assignments', [AssignmentController::class, 'indexByCourse']);
             Route::get('/grades', [GradeController::class, 'index']);
             Route::get('/contents', [ContentController::class, 'index']);
             Route::get('/assignments', [AssignmentController::class, 'index']);

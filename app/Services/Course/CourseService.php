@@ -27,7 +27,13 @@ class CourseService
 
     public function showCourse($data)
     {
-        return Course::findOrFail($data["course_id"]);
+        $course = Course::where('id', $data["course_id"])->firstOrFail();
+        if (auth()->user()->hasRole('student')) {
+            if (!$course->enrollments()->where('student_id', auth()->id())->exists()) {
+                abort(403, 'User does not have the right roles');
+            }
+        }
+        return $course;
     }
 
     public function updateCourse(array $data, $id)

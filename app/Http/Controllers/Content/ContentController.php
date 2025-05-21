@@ -91,4 +91,10 @@ class ContentController extends Controller
 
         return $this->successResponse($result, Response::HTTP_NO_CONTENT);
     }
+
+    public function indexByCourse($courseId)
+    {
+        $contents = Content::where('course_id', $courseId)->get();
+        return $this->successResponse(ContentResource::collection($contents), Response::HTTP_OK);
+    }
 }

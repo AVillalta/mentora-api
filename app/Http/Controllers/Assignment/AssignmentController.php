@@ -112,4 +112,10 @@ class AssignmentController extends Controller
 
         return $this->successResponse($result, Response::HTTP_NO_CONTENT);
     }
+
+    public function indexByCourse($courseId)
+    {
+        $assignments = Assignment::where('course_id', $courseId)->get();
+        return $this->successResponse(AssignmentResource::collection($assignments), Response::HTTP_OK);
+    }
 }

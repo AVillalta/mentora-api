@@ -24,7 +24,8 @@ class PermissionSeeder extends Seeder
             'courses',
             'enrollments',
             'grades',
-            'contents', 
+            'contents',
+            'assignments',
         ];
 
         foreach($models as $model){

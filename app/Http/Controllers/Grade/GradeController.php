@@ -91,4 +91,15 @@ class GradeController extends Controller
 
         return $this->successResponse($result, Response::HTTP_NO_CONTENT);
     }
+
+    public function indexByCourse($courseId)
+    {
+        $grades = Grade::whereHas('enrollment', function ($query) use ($courseId) {
+            $query->where('course_id', $courseId);
+            if (auth()->user()->hasRole('student')) {
+                $query->where('student_id', auth()->id());
+            }
+        })->get();
+        return $this->successResponse(GradeResource::collection($grades), Response::HTTP_OK);
+    }
 }
