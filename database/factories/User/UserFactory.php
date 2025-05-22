@@ -45,6 +45,7 @@ class UserFactory extends Factory
             'address' => fake()->address(),
             'date_of_birth' => fake()->date(),
             'country_id' => 1,
+            'profile_photo' => null,
         ];
     }
 

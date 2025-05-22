@@ -28,6 +28,7 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:api')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/user', [AuthController::class, 'user']);
+        Route::post('/user/update-profile-photo', [UserController::class, 'updateProfilePhoto']);
         Route::get('/countries', [CountryController::class, 'index']);
 
         // Rutas exclusivas para admin

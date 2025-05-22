@@ -77,6 +77,7 @@ class UserUpdateRequest extends FormRequest
                 'date_of_birth' => ['nullable', 'date', 'before:today'],
                 'country_id' => ['nullable', 'exists:countries,id'],
                 'role' => ['nullable', 'string', 'in:admin,professor,student'],
+                'profile_photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
             ];
         }
 
@@ -92,6 +93,7 @@ class UserUpdateRequest extends FormRequest
             'date_of_birth' => ['nullable', 'date', 'before:today'],
             'country_id' => ['nullable', 'exists:countries,id'],
             'role' => ['nullable', 'string', 'in:admin,professor,student'],
+            'profile_photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
         ];
     }
 
@@ -147,6 +149,10 @@ class UserUpdateRequest extends FormRequest
             
             'role.nullable' => 'El campo rol es opcional.',
             'role.in' => 'El rol debe ser uno de los siguientes valores: admin, professor, student.',
+
+            'profile_photo.image' => 'The :attribute must be an image.',
+            'profile_photo.mimes' => 'The :attribute must be a file of type: jpeg, png, jpg, gif.',
+            'profile_photo.max' => 'The :attribute may not be greater than 2048 kilobytes.',
         ];
     }
 }

@@ -87,4 +87,20 @@ class UserController extends Controller
 
         return $this->successResponse($result, Response::HTTP_NO_CONTENT);
     }
+
+    public function updateProfilePhoto(Request $request)
+    {
+        $request->validate([
+            'profile_photo' => ['required', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+        ]);
+
+        $user = $request->user();
+        $result = $this->UserService->updateUser(['profile_photo' => $request->file('profile_photo')], $user->id);
+
+        if ($result instanceof User) {
+            $result = new UserResource($result);
+        }
+
+        return $this->successResponse($result, Response::HTTP_OK);
+    }
 }

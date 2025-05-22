@@ -58,6 +58,10 @@ class UserService
                 'country_id' => $data['country_id'],
             ]);
 
+            if (isset($data['profile_photo']) && $data['profile_photo'] instanceof \Illuminate\Http\UploadedFile) {
+                $result->addMedia($data['profile_photo'])->toMediaCollection('profile_photo');
+            }
+
             if(isset($data['role'])) {
                 $role = Role::findByName($data['role']);
             } else {
@@ -100,6 +104,13 @@ class UserService
 
             $user->update($updates);
 
+            if (isset($data['profile_photo']) && $data['profile_photo'] instanceof \Illuminate\Http\UploadedFile) {
+                $user->clearMediaCollection('profile_photo');
+                $user->addMedia($data['profile_photo'])->toMediaCollection('profile_photo');
+            } elseif (isset($data['profile_photo']) && $data['profile_photo'] === null) {
+                $user->clearMediaCollection('profile_photo');
+            }
+
             if (isset($data['role'])) {
                 $role = Role::findByName($data['role']);
                 $user->syncRoles([$role]);
@@ -114,6 +125,7 @@ class UserService
     {
         DB::transaction(function() use ($id) {
             $user = User::findOrFail($id);
+            $user->clearMediaCollection('profile_photo');
             $user->delete();
         });
     }

@@ -50,8 +50,8 @@ class UserStoreRequest extends FormRequest
             'address' => ['required', 'string', 'max:255'],
             'date_of_birth' => ['required', 'date', 'before:today'],
             'country_id' => ['required', 'exists:countries,id'],
-
             'role' => ['nullable', 'string', 'in:admin,professor,student'],
+            'profile_photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
         ];
             //flag para ver que rol le pongo
     }
@@ -75,6 +75,7 @@ class UserStoreRequest extends FormRequest
             'date_of_birth' => 'date of birth',
             'country_id' => 'country',
             'role' => 'role',
+            'profile_photo' => 'profile photo',
         ];
     }
 
@@ -116,6 +117,10 @@ class UserStoreRequest extends FormRequest
             'country_id.exists' => 'The selected :attribute is invalid.',
             
             'role.in' => 'The :attribute must be one of the following values: admin, professor, student.',
+
+            'profile_photo.image' => 'The :attribute must be an image.',
+            'profile_photo.mimes' => 'The :attribute must be a file of type: jpeg, png, jpg, gif.',
+            'profile_photo.max' => 'The :attribute may not be greater than 2048 kilobytes.',
         ];
     }
 }

@@ -11,12 +11,15 @@ use Laravel\Sanctum\HasApiTokens;
 use App\Models\Country\Country;
 use App\Models\Enrollment\Enrollment;
 use App\Models\Signature\Signature;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class User extends Authenticatable
+class User extends Authenticatable implements HasMedia
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles, HasApiTokens, HasUuids;
+    use HasFactory, Notifiable, HasRoles, HasApiTokens, HasUuids, InteractsWithMedia;
 
     protected $guard_name = 'api';
 
@@ -78,5 +81,10 @@ class User extends Authenticatable
     public function enrollments()
     {
         return $this->hasMany(Enrollment::class, 'student_id');
+    }
+
+    public function getProfilePhotoUrlAttribute(): ?string
+    {
+        return $this->getFirstMediaUrl('profile_photo') ?: null; 
     }
 }
