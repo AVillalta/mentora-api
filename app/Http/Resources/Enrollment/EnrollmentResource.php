@@ -37,6 +37,7 @@ class EnrollmentResource extends JsonResource
                 'id' => $this->course->semester->id,
                 'start_date' => $this->course->semester->start_date,
                 'end_date' => $this->course->semester->end_date,
+                'is_active' => $this->course->semester->is_active,
             ] : null,
         ];
     }
