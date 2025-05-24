@@ -12,7 +12,7 @@ class SignatureResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'syllabus' => json_decode($this->syllabus, true),
+            'syllabus' => $this->syllabus ?? null,
             'syllabus_pdf_url' => $this->syllabus_pdf,
             'professor_id' => $this->professor_id,
             'professor_name' => $this->professor?->name,
