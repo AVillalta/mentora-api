@@ -41,30 +41,35 @@ class EnrollmentFactory extends Factory
     public function configure()
     {
         return $this->afterCreating(function (Enrollment $enrollment) {
-            if (!$enrollment->course->semester->is_active) {
-                $assignments = Assignment::where('course_id', $enrollment->course_id)->get();
-                if ($assignments->isEmpty()) {
-                    // Crear al menos una tarea si no existe
-                    $assignment = Assignment::factory()->create([
-                        'course_id' => $enrollment->course_id,
-                        'total_students' => Enrollment::where('course_id', $enrollment->course_id)->count(),
-                        'submissions' => $this->faker->numberBetween(0, Enrollment::where('course_id', $enrollment->course_id)->count()),
+            $isActiveSemester = $enrollment->course->semester->is_active;
+            $assignments = Assignment::where('course_id', $enrollment->course_id)->get();
+
+            if ($assignments->isEmpty()) {
+                // Crear al menos una tarea si no existe
+                $assignment = Assignment::factory()->create([
+                    'course_id' => $enrollment->course_id,
+                    'total_students' => Enrollment::where('course_id', $enrollment->course_id)->count(),
+                    'submissions' => $this->faker->numberBetween(ceil(Enrollment::where('course_id', $enrollment->course_id)->count() * 0.7), Enrollment::where('course_id', $enrollment->course_id)->count()),
+                ]);
+                $assignments = collect([$assignment]);
+            }
+
+            foreach ($assignments as $assignment) {
+                if ($this->faker->boolean(80)) {
+                    Grade::factory()->create([
+                        'enrollment_id' => $enrollment->id,
+                        'assignment_id' => $assignment->id,
+                        'grade_type' => $isActiveSemester
+                            ? $this->faker->randomElement(['partial', 'work', 'final'])
+                            : $this->faker->randomElement(['ordinary', 'extraordinary', 'work', 'partial', 'final']),
                     ]);
-                    $assignments = collect([$assignment]);
                 }
-                foreach ($assignments as $assignment) {
-                    if ($this->faker->boolean(80)) {
-                        Grade::factory()->create([
-                            'enrollment_id' => $enrollment->id,
-                            'assignment_id' => $assignment->id,
-                        ]);
-                    }
-                }
-                $grades = Grade::where('enrollment_id', $enrollment->id)->get();
-                if ($grades->isNotEmpty()) {
-                    $enrollment->final_grade = $grades->avg('grade_value');
-                    $enrollment->save();
-                }
+            }
+
+            $grades = Grade::where('enrollment_id', $enrollment->id)->get();
+            if ($grades->isNotEmpty() && !$isActiveSemester) {
+                $enrollment->final_grade = $grades->avg('grade_value');
+                $enrollment->save();
             }
         });
     }
