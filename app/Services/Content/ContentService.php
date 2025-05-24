@@ -3,15 +3,38 @@
 namespace App\Services\Content;
 
 use App\Models\Content\Content;
+use App\Models\Enrollment\Enrollment;
 use Illuminate\Support\Facades\DB;
 
 class ContentService
 {
+    /**
+     * Get all contents, filtered by user role.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|\App\Models\Content[]
+     */
     public function getAllContents()
     {
+        $user = auth()->user();
+
+        if ($user && $user->hasRole('student')) {
+            $enrolledCourseIds = Enrollment::where('student_id', $user->id)->pluck('course_id');
+            return Content::whereIn('course_id', $enrolledCourseIds)->get();
+        } elseif ($user && $user->hasRole('professor')) {
+            return Content::whereHas('course.signature', function ($query) use ($user) {
+                $query->where('professor_id', $user->id);
+            })->get();
+        }
+
         return Content::all();
     }
 
+    /**
+     * Create new content.
+     *
+     * @param array $data
+     * @return \App\Models\Content
+     */
     public function saveContent(array $data)
     {
         return DB::transaction(function () use ($data) {
@@ -37,11 +60,24 @@ class ContentService
         });
     }
 
+    /**
+     * Get content by id.
+     *
+     * @param array $data
+     * @return \App\Models\Content
+     */
     public function showContent($data)
     {
         return Content::findOrFail($data["content_id"]);
     }
 
+    /**
+     * Update content.
+     *
+     * @param array $data
+     * @param string $id
+     * @return \App\Models\Content
+     */
     public function updateContent(array $data, $id)
     {
         return DB::transaction(function () use ($data, $id) {
@@ -71,6 +107,12 @@ class ContentService
         });
     }
 
+    /**
+     * Delete content.
+     *
+     * @param string $id
+     * @return void
+     */
     public function deleteContent($id)
     {
         return DB::transaction(function () use ($id) {

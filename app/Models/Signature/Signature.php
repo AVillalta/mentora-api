@@ -20,6 +20,7 @@ class Signature extends Model implements HasMedia
     protected $fillable = [
         'name',
         'syllabus',
+        'syllabus_pdf',
         'professor_id'
     ];
 

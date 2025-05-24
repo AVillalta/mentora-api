@@ -4,36 +4,42 @@ namespace App\Services\Grade;
 
 use App\Models\Course\Course;
 use App\Models\Grade\Grade;
-use Illuminate\Http\Request;
-use Exception;
-use Illuminate\Support\Arr;
-use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\Hash;
+use App\Models\Enrollment\Enrollment;
 use Illuminate\Support\Facades\DB;
-use InvalidArgumentException;
-use PhpParser\Node\Expr\FuncCall;
 
-class GradeService{
-
+class GradeService
+{
     /**
-     * get all grades.
+     * Get all grades, filtered by user role.
      *
-     * @param
      * @return \Illuminate\Database\Eloquent\Collection|\App\Models\Grade[]
      */
-    public function getAllGrades() {
+    public function getAllGrades()
+    {
+        $user = auth()->user();
+
+        if ($user && $user->hasRole('student')) {
+            return Grade::whereHas('enrollment', function ($query) use ($user) {
+                $query->where('student_id', $user->id);
+            })->get();
+        } elseif ($user && $user->hasRole('professor')) {
+            return Grade::whereHas('enrollment.course.signature', function ($query) use ($user) {
+                $query->where('professor_id', $user->id);
+            })->get();
+        }
+
         return Grade::all();
     }
 
-     /**
+    /**
      * Create new grade.
      *
      * @param array $data
      * @return \App\Models\Grade
      */
-    public function saveGrade(array $data) {
-
-        return DB::transaction(function() use ($data){
+    public function saveGrade(array $data)
+    {
+        return DB::transaction(function () use ($data) {
             return Grade::create([
                 'title' => $data['title'],
                 'grade_type' => $data['grade_type'],
@@ -47,7 +53,7 @@ class GradeService{
     /**
      * Get grade by id.
      *
-     * @param $data
+     * @param array $data
      * @return \App\Models\Grade
      */
     public function showGrade($data)
@@ -56,18 +62,18 @@ class GradeService{
         return $result;
     }
 
-     /**
+    /**
      * Update grade.
      *
      * @param array $data
      * @return \App\Models\Grade
      */
-    public function updateGrade(array $data, $id) {
-
+    public function updateGrade(array $data, $id)
+    {
         $grade = Grade::findOrFail($id);
 
-        return DB::transaction(function() use ($grade, $data){
-            $updates =  [
+        return DB::transaction(function () use ($grade, $data) {
+            $updates = [
                 'title' => $data['title'] ?? $grade->title,
                 'grade_type' => $data['grade_type'] ?? $grade->grade_type,
                 'grade_value' => $data['grade_value'] ?? $grade->grade_value,
@@ -79,12 +85,17 @@ class GradeService{
         });
     }
 
+    /**
+     * Delete grade.
+     *
+     * @param string $id
+     * @return void
+     */
     public function deleteGrade($id)
     {
-        DB::transaction(function() use ($id) {
+        DB::transaction(function () use ($id) {
             $grade = Grade::findOrFail($id);
             $grade->delete();
         });
     }
-
 }

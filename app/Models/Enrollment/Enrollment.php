@@ -19,6 +19,7 @@ class Enrollment extends Model
 
     protected $fillable = [
         'enrollment_date',
+        'final_grade',
         'course_id',
         'student_id'
     ];

@@ -2,10 +2,10 @@
 
 namespace App\Models\Course;
 
-use App\Http\Scopes\StudentScope;
 use App\Models\Content\Content;
 use App\Models\Enrollment\Enrollment;
 use App\Models\Scopes\ProfessorScope;
+use App\Models\Scopes\StudentScope;
 use App\Models\Semester\Semester;
 use App\Models\Signature\Signature;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -53,5 +53,6 @@ class Course extends Model
     {
         parent::boot();
         static::addGlobalScope(new ProfessorScope);
+        static::addGlobalScope(new StudentScope);
     }
 }
