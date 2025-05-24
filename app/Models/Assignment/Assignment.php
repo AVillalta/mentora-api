@@ -6,6 +6,7 @@ use App\Models\Course\Course;
 use App\Models\Grade\Grade;
 use App\Models\User\User;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -13,7 +14,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class Assignment extends Model implements HasMedia
 {
-    use HasUuids, InteractsWithMedia;
+    use HasFactory, HasUuids, InteractsWithMedia;
 
     protected $fillable = [
         'title',
