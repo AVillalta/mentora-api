@@ -119,7 +119,7 @@ Usa `curl` o Postman.
 Prueba con el usuario profesor:
 
 ```bash
-curl -X POST http://localhost:8000/api/login \
+curl -X POST http://localhost:80/api/login \
   -H "Content-Type: application/json" \
   -d '{"email":"professor@example.com","password":"password1234"}'
 ```
@@ -132,7 +132,7 @@ Prueba también con `student@example.com` o `admin@example.com`.
 Usa el token:
 
 ```bash
-curl -X GET http://localhost:8000/api/courses \
+curl -X GET http://localhost:80/api/courses \
   -H "Authorization: Bearer <tu-token>"
 ```
 
@@ -174,11 +174,3 @@ sail down
 - **Endpoints**: Mira `routes/api.php`.
 - **Archivos**: Guardados en MinIO (`http://localhost:9001`).
 - **Emails**: En Mailhog (`http://localhost:8025`).
-
-## Contacto
-
-Si algo falla, escribe a [tu-email@example.com](mailto:tu-email@example.com).
-
-## Licencia
-
-MIT License. Ver [LICENSE](LICENSE).
