@@ -8,20 +8,28 @@ use App\Models\User\User;
 use App\Models\Grade\Grade;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Builder;
 
 class AssignmentService
 {
     public function getAllAssignments()
     {
         $user = auth()->user();
-        $assignments = Assignment::all();
+        $assignments = Assignment::query();
 
-        if ($user->hasRole('student')) {
+        if ($user->hasRole('professor')) {
+            // Filtrar tareas por cursos asignados al profesor y activos
+            $assignments->whereHas('course.signature', function (Builder $query) use ($user) {
+                $query->where('professor_id', $user->id);
+            })->whereHas('course.semester', function (Builder $query) {
+                $query->where('is_active', true);
+            });
+        } elseif ($user->hasRole('student')) {
             $enrolledCourseIds = Enrollment::where('student_id', $user->id)->pluck('course_id');
-            $assignments = $assignments->whereIn('course_id', $enrolledCourseIds);
+            $assignments->whereIn('course_id', $enrolledCourseIds);
         }
 
-        return $assignments->map(function ($assignment) {
+        return $assignments->get()->map(function ($assignment) {
             $assignment->total_students = Enrollment::where('course_id', $assignment->course_id)->count();
             $assignment->submissions = $assignment->getMedia('assignment_submissions')
                 ->pluck('custom_properties.student_id')
