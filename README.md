@@ -26,7 +26,7 @@ Sigue estos pasos para levantar la API con **Laravel Sail** (simplifica Docker).
 Abre una terminal y descarga el código:
 
 ```bash
-git clone https://github.com/<tu-usuario>/mentora-api.git
+git clone https://github.com/AVillalta/mentora-api.git
 cd mentora-api
 ```
 
