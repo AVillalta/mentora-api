@@ -1,66 +1,184 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Mentora API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## ¿Qué es Mentora API?
 
-## About Laravel
+**Mentora API** es el backend de Mentora, un campus virtual para universidades. Es una API RESTful que permite a estudiantes, profesores y administradores gestionar cursos, materiales (PDFs, videos), tareas y calificaciones. Está hecha con **Laravel 11** y usa **Docker** para probarla fácilmente en local.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### ¿Qué hace?
+- **Estudiantes**: Ver cursos, descargar materiales, enviar tareas, consultar notas.
+- **Profesores**: Crear cursos, subir materiales, revisar tareas, poner notas.
+- **Administradores**: Gestionar usuarios y configuraciones.
+- Usa MySQL (base de datos), MinIO (almacenamiento), Redis (caché) y Mailhog (emails).
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Requisitos
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Docker** y **Docker Compose** (instalados y funcionando).
+- **Git** (para clonar el código).
+- Terminal (Linux, macOS, o WSL en Windows).
+- 4GB de RAM libres para Docker.
 
-## Learning Laravel
+## Cómo probar la API en local
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Sigue estos pasos para levantar la API con **Laravel Sail** (simplifica Docker).
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### 1. Clona el repositorio
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Abre una terminal y descarga el código:
 
-## Laravel Sponsors
+```bash
+git clone https://github.com/<tu-usuario>/mentora-api.git
+cd mentora-api
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 2. Copia el archivo de configuración
 
-### Premium Partners
+Copia `.env.example` para crear `.env`:
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+```bash
+cp .env.example .env
+```
 
-## Contributing
+No necesitas cambiar nada en `.env`. Los valores por defecto funcionan (puerto `8000`, base de datos `mentora_db`).
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 3. Inicia los servicios
 
-## Code of Conduct
+Levanta los contenedores (API, base de datos, almacenamiento, emails):
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+./vendor/bin/sail up -d
+```
 
-## Security Vulnerabilities
+Esto activa:
+- **API**: `http://localhost:8000` (para navegador o Postman).
+- **Base de datos (MySQL)**: `localhost:3306`.
+- **Almacenamiento (MinIO)**: `localhost:9000`.
+- **Emails (Mailhog)**: `localhost:8025`.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+**Puertos**: La API usa el puerto `80` dentro del contenedor, pero accedes en `http://localhost:8000` porque Docker mapea `8000:80`. No cambies `APP_URL` en `.env`.
 
-## License
+### 4. Instala las dependencias
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Instala las librerías de PHP:
+
+```bash
+sail composer install
+```
+
+### 5. Genera la clave de la aplicación
+
+Crea una clave única para la API:
+
+```bash
+sail artisan key:generate
+```
+
+### 6. Configura la base de datos
+
+Crea las tablas necesarias:
+
+```bash
+sail artisan migrate
+```
+
+### 7. Carga los usuarios de prueba
+
+Ejecuta el seeder para crear usuarios:
+
+```bash
+sail artisan db:seed
+```
+
+Usuarios creados:
+- **Profesor**:
+  - Email: `professor@example.com`
+  - Contraseña: `password1234`
+- **Estudiante**:
+  - Email: `student@example.com`
+  - Contraseña: `password1234`
+- **Admin**:
+  - Email: `admin@example.com`
+  - Contraseña: `password1234`
+
+**Nota**: Los administradores pueden crear más usuarios desde el panel admin en el frontend (por ejemplo, `/admin/users`).
+
+### 8. Configura el almacenamiento
+
+Habilita el acceso a archivos públicos:
+
+```bash
+sail artisan storage:link
+```
+
+Esto permite que los archivos subidos (como materiales) sean accesibles. No necesitas configurar MinIO manualmente; el paquete Media Library lo hace por ti.
+
+### 9. Prueba la API
+
+Usa `curl` o Postman.
+
+#### a. Inicia sesión
+Prueba con el usuario profesor:
+
+```bash
+curl -X POST http://localhost:8000/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"professor@example.com","password":"password1234"}'
+```
+
+Esto devuelve un token (por ejemplo, `1|abcdef...`). Cópialo.
+
+Prueba también con `student@example.com` o `admin@example.com`.
+
+#### b. Lista cursos
+Usa el token:
+
+```bash
+curl -X GET http://localhost:8000/api/courses \
+  -H "Authorization: Bearer <tu-token>"
+```
+
+#### c. Otros ejemplos
+- Detalles de un curso: `GET http://localhost:8000/api/courses/<course_id>`
+- Estudiantes de un curso: `GET http://localhost:8000/api/enrollments?course_id=<course_id>`
+- Subir material (profesor): `POST http://localhost:8000/api/contents` (form-data).
+
+### 10. Para la API
+
+Detén los contenedores:
+
+```bash
+sail down
+```
+
+## Si algo falla
+
+- **No carga `http://localhost:8000`**:
+  - Verifica contenedores: `docker ps`.
+  - Reinicia: `sail down && sail up -d`.
+- **Error de base de datos**:
+  - Confirma `.env`: `DB_HOST=mysql`, `DB_USERNAME=sail`, `DB_PASSWORD=password`.
+  - Refresca: `sail artisan migrate:refresh`.
+- **Archivos no se suben**:
+  - Asegúrate de ejecutar `sail artisan storage:link`.
+  - Verifica MinIO en `http://localhost:9001` (usuario: `minioadmin`, contraseña: `miniopassword`).
+- **Error de CORS**:
+  - Confirma `.env`: `SANCTUM_STATEFUL_DOMAINS=localhost:3000,localhost:8000`.
+
+## Qué puedes probar
+
+- **Profesor**: Sube un PDF (`POST /api/contents`), crea una tarea (`POST /api/assignments`), consulta notas (`GET /api/courses/<course_id>/grades`).
+- **Estudiante**: Ve cursos (`GET /api/courses`), envía tareas (`POST /api/assignments/<id>/submit`).
+- **Admin**: Gestiona usuarios desde el frontend (por ejemplo, `/admin/users`).
+
+## Más info
+
+- **Endpoints**: Mira `routes/api.php`.
+- **Archivos**: Guardados en MinIO (`http://localhost:9001`).
+- **Emails**: En Mailhog (`http://localhost:8025`).
+
+## Contacto
+
+Si algo falla, escribe a [tu-email@example.com](mailto:tu-email@example.com).
+
+## Licencia
+
+MIT License. Ver [LICENSE](LICENSE).
